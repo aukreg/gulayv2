@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101418">
+<title>Kelime Kartları</title>
+<style>
+:root{
+  --bg:#101418; --card:#1A2027; --card2:#222A33; --line:#2C3640;
+  --tx:#E8EDF2; --tx2:#98A4B0; --acc:#FFC531; --ok:#3FD98D; --bad:#FF6C5F;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+@media (prefers-color-scheme: light){
+  :root{
+    --bg:#F3F5F8; --card:#FFFFFF; --card2:#F7F9FB; --line:#DCE3EA;
+    --tx:#141A21; --tx2:#5A6773; --acc:#B8830A; --ok:#1F8A5B; --bad:#C8322B;
+    --shadow:0 10px 30px rgba(20,30,40,.10);
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;overscroll-behavior:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+#app{max-width:520px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 16px)}
+.hidden{display:none!important}
+
+/* header */
+.hdr{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.hdr h1{font-size:20px;margin:0;flex:1;letter-spacing:.01em}
+.ib{width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);
+  display:grid;place-items:center;font-size:18px;color:var(--tx2)}
+.ib:active{transform:scale(.96)}
+
+/* start */
+.hero{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 20px;margin-bottom:16px}
+.hero .big{font-size:44px;font-weight:800;line-height:1;color:var(--acc)}
+.hero p{margin:8px 0 0;color:var(--tx2);line-height:1.45}
+.lbl{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx2);margin:6px 2px 8px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:5px;margin-bottom:18px}
+.seg button{padding:11px 4px;border-radius:10px;font-size:14px;font-weight:600;color:var(--tx2)}
+.seg button.on{background:var(--acc);color:#111}
+.btn{display:block;width:100%;padding:16px;border-radius:14px;font-size:17px;font-weight:700;text-align:center}
+.btn.pri{background:var(--acc);color:#111}
+.btn.sec{background:var(--card);border:1px solid var(--line);margin-top:10px}
+.btn:active{transform:scale(.99)}
+.tip{color:var(--tx2);font-size:13px;text-align:center;margin-top:18px;line-height:1.5}
+
+/* session */
+.bar{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:14px;color:var(--tx2)}
+.bar .grow{flex:1}
+.prog{height:6px;border-radius:3px;background:var(--card2);overflow:hidden;margin-bottom:16px;border:1px solid var(--line)}
+.prog i{display:block;height:100%;background:var(--acc);width:0;transition:width .25s}
+.pill{padding:3px 9px;border-radius:99px;background:var(--card);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.pill.ok{color:var(--ok)} .pill.bad{color:var(--bad)}
+
+.stage{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:340px;perspective:1200px}
+.card{position:relative;width:100%;height:min(58vh,400px);transform-style:preserve-3d;transition:transform .45s cubic-bezier(.3,.7,.3,1);cursor:pointer;touch-action:pan-y}
+.card.flip{transform:rotateY(180deg)}
+.card.drag{transition:none}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:22px;
+  background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 22px;text-align:center}
+.face.back{transform:rotateY(180deg);background:var(--card2)}
+.face .tag{position:absolute;top:16px;left:18px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--tx2)}
+.face .word{font-size:clamp(30px,9vw,44px);font-weight:750;line-height:1.15;word-break:break-word}
+.face .sub{margin-top:14px;color:var(--tx2);font-size:17px}
+.face .hint{position:absolute;bottom:16px;font-size:13px;color:var(--tx2)}
+.say{position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:12px;font-size:19px;color:var(--tx2)}
+.say:active{background:var(--line)}
+.stamp{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;font-weight:800;padding:8px 16px;
+  border-radius:12px;border:3px solid;opacity:0;pointer-events:none;letter-spacing:.06em;z-index:3}
+.stamp.ok{color:var(--ok);border-color:var(--ok)} .stamp.bad{color:var(--bad);border-color:var(--bad)}
+
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.acts button{padding:17px 8px;border-radius:14px;font-size:16px;font-weight:700;border:1px solid var(--line);background:var(--card)}
+.acts .no{color:var(--bad)} .acts .yes{color:var(--ok)}
+.acts button:active{transform:scale(.98)}
+.acts.wait button{opacity:.45}
+.undo{margin:12px auto 0;font-size:14px;color:var(--tx2);padding:6px 10px}
+.undo:disabled{opacity:.3}
+
+/* summary */
+.sum{text-align:center;padding-top:20px}
+.sum .emoji{font-size:56px}
+.sum h2{margin:10px 0 4px;font-size:26px}
+.sum p{color:var(--tx2);margin:0 0 20px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.stats div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stats b{display:block;font-size:30px}
+.stats span{font-size:13px;color:var(--tx2)}
+.miss{text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px 14px;margin-bottom:16px;max-height:36vh;overflow:auto}
+.miss div{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+.miss div:last-child{border-bottom:0}
+.miss span:last-child{color:var(--tx2);text-align:right}
+
+/* list */
+.list{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 14px}
+.list div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.list div:last-child{border-bottom:0}
+.list span:first-child{font-weight:600}
+.list span:last-child{color:var(--tx2);text-align:right}
+/* deste seçimi */
+.decks{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-bottom:18px}
+.deck{display:flex;align-items:center;gap:12px;width:100%;padding:13px 14px;border-bottom:1px solid var(--line);text-align:left}
+.deck:last-child{border-bottom:0}
+.deck .ck{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);flex:none;display:grid;place-items:center;font-size:14px;font-weight:800;color:#111}
+.deck.on .ck{background:var(--acc);border-color:var(--acc)}
+.deck.on .ck::after{content:"✓"}
+.deck .nm{flex:1;min-width:0}
+.deck .nm b{display:block;font-size:16px}
+.deck .nm span{font-size:13px;color:var(--tx2)}
+.deck .n{font-size:13px;color:var(--tx2);font-variant-numeric:tabular-nums}
+.deck.all .nm b{color:var(--acc)}
+.opt{display:flex;align-items:center;gap:12px;width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;margin-bottom:18px;text-align:left}
+.opt .nm{flex:1} .opt .nm b{display:block;font-size:15px} .opt .nm span{font-size:13px;color:var(--tx2)}
+.sw{width:46px;height:28px;border-radius:99px;background:var(--line);position:relative;flex:none;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .2s}
+.opt.on .sw{background:var(--acc)} .opt.on .sw::after{left:21px}
+.btn.pri:disabled{opacity:.4}
+.face .word.sm{font-size:clamp(20px,5.6vw,26px)}
+.face .unit{position:absolute;bottom:40px;font-size:13px;color:var(--acc);letter-spacing:.04em}
+.list h3{margin:14px 0 2px;font-size:14px;color:var(--acc);letter-spacing:.04em}
+.list div.ex span:first-child{font-style:italic;font-weight:500}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- START -->
+  <section id="vStart">
+    <div class="hdr"><h1>Kelime Kartları</h1><button class="ib" id="toList" aria-label="Kelime listesi">☰</button></div>
+    <div class="lbl">Ne çalışacaksın?</div>
+    <div class="decks" id="decks"></div>
+    <button class="opt" id="exprOpt"><span class="nm"><b>İfadeleri de ekle</b><span>Ünitelerdeki "Expressions" kalıpları</span></span><span class="sw"></span></button>
+    <div class="lbl">Kartın ön yüzü</div>
+    <div class="seg" id="dirSeg">
+      <button data-d="en">İngilizce</button>
+      <button data-d="tr">Türkçe</button>
+      <button data-d="mix">Karışık</button>
+    </div>
+    <button class="btn pri" id="start">Başla</button>
+    <button class="btn sec hidden" id="resume">Kaldığın yerden devam et</button>
+    <div class="tip">Kelimeler her turda karışık gelir, bilmediklerin turun sonunda tekrar sorulur.<br>Karta dokun → çevir · Sağa kaydır → biliyorum · Sola kaydır → bilmiyorum</div>
+  </section>
+
+  <!-- SESSION -->
+  <section id="vSession" class="hidden">
+    <div class="hdr"><button class="ib" id="home" aria-label="Ana ekran">←</button><h1 id="roundTtl">1. tur</h1><button class="ib" id="reshuffle" aria-label="Yeniden karıştır">⟲</button></div>
+    <div class="bar"><span id="pos"></span><span class="grow"></span><span class="pill ok" id="cOk">✓ 0</span><span class="pill bad" id="cBad">✗ 0</span></div>
+    <div class="prog"><i id="progBar"></i></div>
+    <div class="stage">
+      <div class="card" id="card">
+        <div class="stamp ok" id="stOk">BİLİYORUM</div>
+        <div class="stamp bad" id="stBad">TEKRAR</div>
+        <div class="face front">
+          <span class="tag" id="fTag">İngilizce</span>
+          <button class="say" id="sayF" aria-label="Dinle">🔊</button>
+          <div class="word" id="fWord"></div>
+          <div class="unit" id="fUnit"></div>
+          <div class="hint">çevirmek için dokun</div>
+        </div>
+        <div class="face back">
+          <span class="tag" id="bTag">Türkçe</span>
+          <button class="say" id="sayB" aria-label="Dinle">🔊</button>
+          <div class="word" id="bWord"></div>
+          <div class="sub" id="bSub"></div>
+        </div>
+      </div>
+    </div>
+    <div class="acts" id="acts">
+      <button class="no" id="no">✗ Bilmiyorum</button>
+      <button class="yes" id="yes">✓ Biliyorum</button>
+    </div>
+    <button class="undo" id="undo" disabled>↶ Geri al</button>
+  </section>
+
+  <!-- SUMMARY -->
+  <section id="vSum" class="hidden">
+    <div class="sum">
+      <div class="emoji" id="sEmoji">🎉</div>
+      <h2 id="sTtl">Tur bitti</h2>
+      <p id="sTxt"></p>
+      <div class="stats">
+        <div><b id="sOk" style="color:var(--ok)">0</b><span>biliyorum</span></div>
+        <div><b id="sBad" style="color:var(--bad)">0</b><span>tekrar</span></div>
+      </div>
+      <div class="miss" id="sMiss"></div>
+      <button class="btn pri" id="again">Bilmediklerimi karışık tekrar et</button>
+      <button class="btn sec" id="restart">Hepsini baştan karıştır</button>
+      <button class="btn sec" id="sHome">Ana ekran</button>
+    </div>
+  </section>
+
+  <!-- LIST -->
+  <section id="vList" class="hidden">
+    <div class="hdr"><button class="ib" id="listBack" aria-label="Geri">←</button><h1>Tüm kelimeler</h1></div>
+    <div class="list" id="list"></div>
+  </section>
+</div>
+
+<script>
+/* Yeni ünite eklemek için DECKS listesine aynı biçimde bir satır ekle. */
+const WORDS71 = [
+ ["old", "yaşlı"],
+ ["personality", "kişilik"],
+ ["eye", "göz"],
+ ["people", "insanlar"],
+ ["weight", "ağırlık / kilo"],
+ ["ginger", "kızıl"],
+ ["on time", "zamanında"],
+ ["plump", "tombul"],
+ ["wavy", "dalgalı"],
+ ["appearance", "dış görünüş"],
+ ["young", "genç"],
+ ["fat", "şişman"],
+ ["glasses", "gözlük"],
+ ["cute", "sevimli"],
+ ["straight", "düz"],
+ ["lazy", "tembel"],
+ ["smile", "gülümsemek"],
+ ["slim / thin", "ince / zayıf"],
+ ["care about", "önemsemek"],
+ ["handsome", "yakışıklı"],
+ ["get on well with", "iyi geçinmek (biriyle)"],
+ ["talkative", "konuşkan"],
+ ["important", "önemli"],
+ ["serious", "ciddi"],
+ ["talk", "konuşmak"],
+ ["of medium weight", "orta kilolu"],
+ ["punctual", "dakik"],
+ ["present", "hediye"],
+ ["early", "erken"],
+ ["tell the truth", "doğruyu söylemek"],
+ ["make jokes", "şaka yapmak"],
+ ["beautiful", "güzel"],
+ ["height", "boy"],
+ ["late", "geç"],
+ ["curly", "kıvırcık"],
+ ["alone", "yalnız"],
+ ["break", "kırmak"],
+ ["meet", "tanışmak / buluşmak"],
+ ["share", "paylaşmak"],
+ ["of medium height", "orta boylu"],
+ ["fair", "açık renk (saç/ten)"],
+ ["wear", "giymek / takmak"],
+ ["new", "yeni"],
+ ["stubborn", "inatçı"],
+ ["worried", "endişeli"],
+ ["headscarf", "başörtüsü"],
+ ["light", "açık (renk)"],
+ ["blonde", "sarı (saç)"],
+ ["outgoing", "dışa dönük / sosyal"],
+ ["dark", "koyu (renk)"],
+ ["clumsy", "sakar"],
+ ["rarely", "nadiren"],
+ ["easy-going", "uysal / rahat"],
+ ["smart", "zeki"],
+ ["change your mind", "fikrini değiştirmek"],
+ ["upset", "üzgün"],
+ ["hard-working", "çalışkan"],
+ ["have got", "sahip olmak"],
+ ["a lot", "çok"],
+ ["selfish", "bencil"],
+ ["generous", "cömert"],
+ ["hazel", "ela (göz)"],
+ ["in a mess", "darmadağın"],
+ ["honest", "dürüst"],
+ ["friendly", "arkadaş canlısı"],
+ ["other", "diğer"],
+ ["be fond of", "düşkün olmak"],
+ ["hair", "saç"],
+ ["short", "kısa"],
+ ["tall", "uzun"],
+ ["relaxed", "rahat"]
+];
+const DECKS = [
+ {id:"k71", name:"71 Kelime", title:"Karışık liste", words:WORDS71, expr:[]},
+ {id:"u1", name:"Unit 1", title:"Appearance & Personality", words:[
+  ["attractive","çekici, alımlı"],["appearance","görünüş"],["blond(e)","sarışın"],["care","umursamak"],
+  ["change ideas","fikir değiştirmek"],["curly","kıvırcık (saç)"],["cute","sevimli"],
+  ["get high marks","yüksek notlar almak"],["get on well with","iyi geçinmek"],["give a present","hediye vermek"],
+  ["hair","saç"],["handsome","yakışıklı"],["help people","insanlara yardım etmek"],["in common","ortak, müşterek"],
+  ["make a joke","şaka yapmak"],["meet people","yeni insanlarla tanışmak"],["on time","vaktinde, zamanında"],
+  ["personality","kişilik"],["plump","balık etli, tombul"],["share","paylaşmak"],["smile","gülümsemek; tebessüm"],
+  ["spend time","vakit geçirmek"],["straight","düz"],["study hard","çok çalışmak"],["successful","başarılı"],
+  ["tell a lie","yalan söylemek"],["tell the truth","gerçeği söylemek"],["think","düşünmek"],["wavy","dalgalı"],
+  ["wear","giymek, takmak"]
+ ], expr:[
+  ["as stubborn as a goat","keçi gibi inatçı"],["I don't think ...","Sanmıyorum ..."],
+  ["I don't think so.","Hiç sanmıyorum."],["I think ...","Bence ..."],["I'm not sure.","Emin değilim."],
+  ["Keep in mind!","Aklınızda bulunsun!"],["Skin and bones.","Bir deri bir kemik."],
+  ["Well ...","Yani ... / Pekala ..."],["You are right.","Haklısın."]
+ ]},
+ {id:"u2", name:"Unit 2", title:"Sports", words:[
+  ["achieve","başarmak"],["arrow","ok"],["beat","yenmek"],["bow","yay"],["court","kort, saha"],
+  ["daily routine","günlük işler"],["do exercise","egzersiz yapmak"],["draw","berabere; çizmek"],
+  ["eat healthy food","sağlıklı yiyecekler yemek"],["equipment","ekipman"],["follow","takip etmek, izlemek"],
+  ["get a point","puan almak"],["gym","spor salonu"],["have an injury","yaralanmak, sakatlanmak"],["helmet","kask"],
+  ["hold the world record","dünya rekorunu elinde tutmak"],["individual sports","bireysel sporlar"],
+  ["indoor sports","kapalı alan sporları"],["injury","sakatlık"],["lose","kaybetmek"],
+  ["need","ihtiyaç duymak, ihtiyacı olmak"],["outdoor sports","açık alan sporları"],["score a goal","gol atmak"],
+  ["snowboarding","kar kayağı yapma"],["spectator","seyirci"],["support","desteklemek"],["swimsuit","mayo"],
+  ["team sports","takım sporları"],["train","antrenman yapmak"],["win a medal","madalya kazanmak"]
+ ], expr:[
+  ["A healthy mind in a healthy body!","Sağlam kafa sağlam vücutta bulunur!"],["Are you serious?","Ciddi misin?"],
+  ["Great.","Harika."],["I hope ...","... ümit ediyorum."],["I hope so.","Umarım öyledir."],["I'm sure.","Eminim."],
+  ["Oh, no!","Oh, hayır!"],["Really?","Gerçekten mi?"],["throw in the towel","havlu atmak, pes etmek"],
+  ["What a great honor!","Ne büyük bir onur!"]
+ ]},
+ {id:"u3", name:"Unit 3", title:"Biographies", words:[
+  ["achieve","başarmak"],["alone","yalnız"],["at the age of ...","... yaşında"],["attempt","denemek"],["award","ödül"],
+  ["be born","doğmak"],["become a chemist","kimyager olmak"],["biography","biyografi"],["brilliant","parlak"],
+  ["composer","bestekâr, besteci"],["create","oluşturmak, yaratmak"],["date of birth","doğum tarihi"],["die","ölmek"],
+  ["famous","ünlü"],["get married","evlenmek"],["graduate","mezun olmak"],["grow up","büyümek"],["invent","icat etmek"],
+  ["learn","öğrenmek"],["medicine","tıp"],["milestone","dönüm noktası"],["move","taşınmak"],
+  ["place of birth","doğum yeri"],["raise children","çocuk yetiştirmek"],["retire","emekli olmak"],
+  ["study","(ders) çalışmak, öğrenim görmek"],["successful","başarılı"],["travel around the world","dünyayı dolaşmak"],
+  ["win a fellowship","burs kazanmak"],["win an award","ödül kazanmak"]
+ ], expr:[
+  ["Of course, you can.","Tabii ki yapabilirsin."],["One in a million.","Milyonda bir."]
+ ]},
+ {id:"u4", name:"Unit 4", title:"Wild Animals", words:[
+  ["become extinct","soyu tükenmek"],["cage","kafes"],["caracal","vaşak"],["catch","yakalamak"],
+  ["climate change","iklim değişikliği"],["desert","çöl"],["eagle","kartal"],["eat","yemek"],
+  ["endangered","tehlike altında"],["enormous","muazzam, kocaman"],["fallow deer","alageyik"],["fur","kürk"],
+  ["habitat","yaşam alanı"],["horn","boynuz"],["hunt","avlamak"],["ivory","fildişi"],["jungle","tropik yağmur ormanı"],
+  ["land","kara"],["mountain","dağ"],["passenger pigeon","göçmen güvercin"],["polar bear","kutup ayısı"],
+  ["pollute","kirletmek"],["protect","korumak"],["savannah","bozkır"],["save","korumak, kurtarmak"],
+  ["species","tür, cins"],["take action","harekete geçmek"],["trunk","fil hortumu"],["wild animal","vahşi hayvan"],
+  ["wing","kanat"]
+ ], expr:[
+  ["First of all,","İlk olarak,"],["I'm really sorry.","Gerçekten çok üzgünüm."],
+  ["Mad as a hornet.","Çok sinirli. Eşek arısı kadar kızgın."],["See you.","Görüşürüz."],
+  ["That's all for today.","Bugünlük bu kadar."],["What a pity!","Ne yazık!"]
+ ]},
+ {id:"u5", name:"Unit 5", title:"Television", words:[
+  ["animation","animasyon"],["appear","sahneye çıkmak"],["audience","seyirci"],["cartoon","çizgi film"],
+  ["change","değiştirmek"],["channel","kanal"],["commercial","reklam"],["decide","karar vermek"],
+  ["director","yönetmen"],["discussion","tartışma"],["documentary","belgesel"],["episode","bölüm"],
+  ["famous","ünlü"],["go out","dışarı çıkmak"],["learn","öğrenmek"],["movie / film","film"],
+  ["news","haberler"],["prefer","tercih etmek"],["quiz show","bilgi yarışması"],
+  ["reality show","sıradan insanların yaşamlarını konu alan televizyon programı"],
+  ["recommend","tavsiye etmek"],["remote control","uzaktan kumanda"],["series","dizi"],
+  ["sitcom","durum komedisi"],["soap opera","pembe dizi"],["spend time","vakit harcamak"],
+  ["suitable","uygun"],["talk show","sohbet programı"],["violence","şiddet"],["watch","izlemek, seyretmek"]
+ ], expr:[
+  ["Bye.","Güle güle."],["I agree with you.","Sana katılıyorum."],
+  ["You are very kind.","Çok naziksiniz."],["You're welcome.","Rica ederim."]
+ ]},
+ {id:"u6", name:"Unit 6", title:"Celebrations", words:[
+  ["accept","kabul etmek"],["arrange","düzenlemek"],["barbeque party","barbekü / mangal partisi"],
+  ["beverage / drink","içecek"],["blow the balloons","balonları şişirmek"],["bring","getirmek"],
+  ["celebration","kutlama"],["cookie","kurabiye"],["date","tarih (gün/ay/yıl)"],
+  ["decorate the room","odayı süslemek"],["decoration","süsleme, dekorasyon"],["delicious","leziz"],
+  ["fancy dress party","kostüm partisi"],["farewell party","veda partisi"],["guest list","misafir listesi"],
+  ["host","ağırlamak; davet sahibi"],["invite","davet etmek"],["join","katılmak"],["make a cake","pasta yapmak"],
+  ["organize","organize etmek"],["place","yer"],["prepare","hazırlamak"],["refuse","reddetmek"],
+  ["slumber party","pijama partisi"],["text a message","mesaj göndermek"],["time","zaman"],
+  ["to-do list","yapılacaklar listesi"],["wedding","düğün"],["wrap a present","hediye paketlemek"],
+  ["write an invitation card","davetiye yazmak"]
+ ], expr:[
+  ["A social butterfly.","Çok sosyal kimse."],["Alright.","Pekala."],["Great.","Harika."],
+  ["I hope ...","... ümit ediyorum."],["See you later.","Sonra görüşürüz."]
+ ]},
+ {id:"u7", name:"Unit 7", title:"Dreams", words:[
+  ["be famous","ünlü olmak"],["become rich","zengin olmak"],["buy","satın almak"],["buy a house","ev satın almak"],
+  ["company","şirket"],["do housework","ev işleri yapmak"],["dream","hayal; hayal kurmak"],
+  ["earn money","para kazanmak"],["find a solution","çözüm bulmak"],["flying car","uçan araba"],
+  ["future","gelecek"],["get married","evlenmek"],["go abroad","yurt dışına gitmek"],
+  ["go on holiday","tatile çıkmak"],["graduate from university","üniversiteden mezun olmak"],
+  ["have high marks","yüksek notlara sahip olmak"],["have a child","çocuk sahibi olmak"],
+  ["have a job","iş sahibi olmak"],["life","hayat"],["live in a town","kasabada yaşamak"],
+  ["make a career","kariyer yapmak"],["peaceful","huzurlu"],["run own business","kendi işini yönetmek"],
+  ["see","görmek"],["study medicine","tıp okumak"],["travel around the world","dünyayı dolaşmak"],
+  ["travel to space","uzaya seyahat etmek"],["underwater city","su altı şehri"],
+  ["use food pills","besin hapları kullanmak"],["vacation","tatil"]
+ ], expr:[
+  ["be a dream team","rüya takımı olmak"],["Do you think so?","Öyle mi düşünüyorsun?"],
+  ["I don't think so.","Sanmıyorum."],["I hope not.","Umarım öyle olmaz."],
+  ["I hope so.","Umarım öyledir."],["I think so.","Ben de öyle düşünüyorum."]
+ ]},
+ {id:"u8", name:"Unit 8", title:"Public Buildings", words:[
+  ["ask for information","bilgi almak"],["bakery","fırın"],["borrow a book","kitap ödünç almak"],
+  ["butcher's","kasap"],["buy a painkiller","ağrı kesici satın almak"],
+  ["buy a computer game","bilgisayar oyunu satın almak"],["cat food","kedi maması"],["chemist's","eczane"],
+  ["city hall","belediye binası"],["cook a meal","yemek pişirmek"],["department store","büyük mağaza"],
+  ["do shopping","alışveriş yapmak"],["draw money","para çekmek"],["eat seafood","deniz ürünleri yemek"],
+  ["governorship","valilik"],["greengrocer's","manav"],["grocery","bakkal"],["meet","tanışmak"],
+  ["municipality","belediye"],["need","ihtiyacı olmak"],["pay taxes","vergi ödemek"],
+  ["pay the bills","faturaları ödemek"],["pet shop","evcil hayvan dükkanı"],["post a letter","mektup göndermek"],
+  ["report a burglary","hırsızlık ihbarında bulunmak"],["see exhibitions","sergilere bakmak"],
+  ["see historical works","tarihi eserlere bakmak"],["spend time","vakit geçirmek"],["store","mağaza"],
+  ["walk the dog","köpeği gezdirmek"]
+ ], expr:[
+  ["Can I help you?","Yardımcı olabilir miyim?"],["How is it going?","Nasıl gidiyor?"],["I hope ...","Umarım ..."],
+  ["It's a great idea.","Bu harika bir fikir."],["Nevermind.","Boş ver."],["Nothing new.","Yeni bir şey yok."],
+  ["Take care.","Kendine iyi bak."],["Thank you for your help.","Yardımınız için teşekkürler."],
+  ["That sounds cool.","Kulağa hoş geliyor."],["Window shopping","Vitrinleri seyretmek."]
+ ]},
+ {id:"u9", name:"Unit 9", title:"Environment", words:[
+  ["be careful","dikkatli olmak"],["burn coals","kömür yakmak"],["cause","sebep olmak"],
+  ["climate change","iklim değişikliği"],["destroy forests","ormanları yok etmek"],["eco-friendly","çevre dostu"],
+  ["environment","çevre"],["greenhouse effect","sera etkisi"],["increase","artmak; artış"],["keep clean","temiz tutmak"],
+  ["noise pollution","gürültü kirliliği"],["ozone layer","ozon tabakası"],["pesticide","böcek ilacı"],
+  ["pollute","kirletmek"],["produce","üretmek"],["product","ürün"],["protect","korumak"],
+  ["public transportation","toplu taşıma"],["recycle","geri dönüştürmek"],["reduce","azaltmak"],
+  ["renewable energy","yenilenebilir enerji"],["reuse","yeniden kullanmak"],["save","tasarruf etmek, korumak"],
+  ["take a precaution","önlem almak"],["temperature","sıcaklık"],["throw rubbish around","etrafa çöp atmak"],
+  ["turn off / switch off","kapatmak"],["use","kullanmak"],["use a filter","filtre kullanmak"],
+  ["waste","atık; boşa harcamak"]
+ ], expr:[
+  ["Do you think so?","Öyle mi düşünüyorsun?"],["I don't think so.","Ben öyle düşünmüyorum."],
+  ["Probably.","Muhtemelen."],["Definitely.","Kesinlikle."],["I hope so.","Umarım öyledir."],
+  ["I hope not.","Umarım öyle değildir."],["I believe ...","İnanıyorum ki ..."],["I guess ...","Sanırım ..."],
+  ["be a dream team","rüya takımı olmak"],["I think ...","Bence ..."]
+ ]},
+ {id:"u10", name:"Unit 10", title:"Planets", words:[
+  ["asteroid belt","asteroit kuşağı"],["average","ortalama"],["billion","milyar"],["black hole","kara delik"],
+  ["comet","kuyruklu yıldız"],["diameter","çap"],["distance","mesafe"],["dwarf planet","cüce gezegen"],
+  ["explore","keşfetmek"],["go round","etrafında dönmek"],["gravity","yer çekimi"],["human","insan"],
+  ["land","iniş yapmak"],["lunar eclipse","ay tutulması"],["meteor shower","meteor yağmuru"],["moon","ay"],
+  ["object","cisim, nesne"],["observe","gözlemlemek"],["orbit","yörünge; yörüngede dönmek"],["rocky","kayalık"],
+  ["satellite","uydu"],["solar eclipse","güneş tutulması"],["solar system","güneş sistemi"],["space","uzay"],
+  ["space shuttle","uzay mekiği"],["step","adım"],["surface","yüzey"],["temperature","sıcaklık"],
+  ["universe","evren, kainat"],["walk on the moon","ay yüzeyinde yürümek"]
+ ], expr:[
+  ["Really?","Gerçekten mi?"],["That's cool.","Harika."],["over the moon","çok sevinçli"]
+ ]}
+];
+const KEY = "kelime-kartlari-v2";
+const $ = id => document.getElementById(id);
+
+let st = null;                 // oturum durumu
+let dir = "en";                 // en | tr | mix
+let sel = ["k71"];              // seçili desteler
+let withExpr = true;
+let flipped = false, busy = false;
+
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)) || {}; }catch(e){ return {}; } }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify({dir, sel, withExpr, st})); }catch(e){} }
+
+/* anahtar: "desteId|w|sıra" (kelime) veya "desteId|e|sıra" (ifade) */
+const BY_ID = Object.fromEntries(DECKS.map(d => [d.id, d]));
+function item(k){
+  const [id, t, i] = k.split("|"), d = BY_ID[id];
+  const w = d && (t === "e" ? d.expr : d.words)[+i];
+  return w ? { en: w[0], tr: w[1], deck: d, ex: t === "e" } : null;
+}
+function deckKeys(d, ex){
+  return d.words.map((_, i) => d.id + "|w|" + i).concat(ex ? d.expr.map((_, i) => d.id + "|e|" + i) : []);
+}
+function poolKeys(){ return DECKS.filter(d => sel.includes(d.id)).flatMap(d => deckKeys(d, withExpr)); }
+
+function shuffle(a){
+  a = a.slice();
+  for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function makeRound(keys, round, pool){
+  return { round, pool: pool || keys,
+           queue: shuffle(keys).map(k => ({ k, d: dir === "mix" ? (Math.random() < .5 ? "en" : "tr") : dir })),
+           pos: 0, ok: [], bad: [], hist: [] };
+}
+function newSession(){ const p = poolKeys(); if(!p.length) return; st = makeRound(p, 1); save(); renderCard(); }
+
+function show(v){
+  for(const s of ["vStart","vSession","vSum","vList"]) $(s).classList.toggle("hidden", s !== v);
+  $("vSession").style.cssText = v === "vSession" ? "flex:1;display:flex;flex-direction:column" : "";
+  window.scrollTo(0, 0);
+}
+
+/* ---------- start ---------- */
+function deckRow(cls, name, title, n, on, id){
+  const b = document.createElement("button");
+  b.className = "deck " + cls + (on ? " on" : "");
+  b.dataset.id = id;
+  b.innerHTML = '<span class="ck"></span><span class="nm"><b></b><span></span></span><span class="n"></span>';
+  b.querySelector("b").textContent = name;
+  b.querySelector(".nm span").textContent = title;
+  b.querySelector(".n").textContent = n;
+  return b;
+}
+function renderStart(){
+  const box = $("decks"); box.innerHTML = "";
+  const units = DECKS.filter(d => d.id !== "k71");
+  const allOn = units.length && units.every(d => sel.includes(d.id));
+  for(const d of DECKS){
+    box.append(deckRow("", d.name, d.title, deckKeys(d, withExpr).length, sel.includes(d.id), d.id));
+  }
+  box.append(deckRow("all", "Tüm üniteler", units.map(d => d.name.replace("Unit ", "")).join(", "),
+    units.reduce((s, d) => s + deckKeys(d, withExpr).length, 0), allOn, "*"));
+  $("exprOpt").classList.toggle("on", withExpr);
+  document.querySelectorAll("#dirSeg button").forEach(b => b.classList.toggle("on", b.dataset.d === dir));
+  const n = poolKeys().length;
+  $("start").disabled = !n;
+  $("start").textContent = n ? `Başla · ${n} kart` : "Bir liste seç";
+  $("resume").classList.toggle("hidden", !(st && st.pos < st.queue.length));
+  show("vStart");
+}
+$("decks").onclick = e => {
+  const b = e.target.closest(".deck"); if(!b) return;
+  const id = b.dataset.id;
+  if(id === "*"){
+    const units = DECKS.filter(d => d.id !== "k71").map(d => d.id);
+    const allOn = units.every(u => sel.includes(u));
+    sel = allOn ? sel.filter(s => !units.includes(s)) : [...new Set(sel.concat(units))];
+  } else sel = sel.includes(id) ? sel.filter(s => s !== id) : sel.concat(id);
+  save(); renderStart();
+};
+$("exprOpt").onclick = () => { withExpr = !withExpr; save(); renderStart(); };
+$("dirSeg").onclick = e => {
+  const b = e.target.closest("button"); if(!b) return;
+  dir = b.dataset.d; save(); renderStart();
+};
+$("start").onclick = newSession;
+$("resume").onclick = () => renderCard();
+
+/* ---------- card ---------- */
+function speak(text, lang){
+  try{
+    if(!("speechSynthesis" in window)) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/\s*[\/;]\s*/g, ", ").replace(/\(.*?\)/g, "").replace(/\.\.\./g, ""));
+    u.lang = lang === "en" ? "en-US" : "tr-TR"; u.rate = .9;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function cur(){ return st.queue[st.pos]; }
+
+function renderCard(){
+  if(st.pos >= st.queue.length) return renderSum();
+  const c = cur(), it = item(c.k);
+  const front = c.d === "en" ? it.en : it.tr, back = c.d === "en" ? it.tr : it.en;
+  flipped = false; busy = false;
+  const card = $("card");
+  card.classList.add("drag"); card.classList.remove("flip"); card.style.transform = "";
+  $("stOk").style.opacity = 0; $("stBad").style.opacity = 0;
+  void card.offsetWidth; card.classList.remove("drag");
+  $("fTag").textContent = c.d === "en" ? "İngilizce" : "Türkçe";
+  $("bTag").textContent = c.d === "en" ? "Türkçe" : "İngilizce";
+  $("fWord").textContent = front;
+  $("bWord").textContent = back;
+  $("fWord").classList.toggle("sm", front.length > 28);
+  $("bWord").classList.toggle("sm", back.length > 28);
+  $("bSub").textContent = front;
+  $("fUnit").textContent = it.deck.id === "k71" ? "" : it.deck.name + " · " + it.deck.title + (it.ex ? " · ifade" : "");
+  $("roundTtl").textContent = st.round + ". tur";
+  $("pos").textContent = (st.pos + 1) + " / " + st.queue.length;
+  $("progBar").style.width = (st.pos / st.queue.length * 100) + "%";
+  $("cOk").textContent = "✓ " + st.ok.length;
+  $("cBad").textContent = "✗ " + st.bad.length;
+  $("undo").disabled = !st.hist.length;
+  show("vSession");
+}
+function flip(){
+  if(busy) return;
+  flipped = !flipped;
+  $("card").classList.toggle("flip", flipped);
+}
+function answer(known){
+  if(busy) return;
+  busy = true;
+  const c = cur();
+  (known ? st.ok : st.bad).push(c.k);
+  st.hist.push(known);
+  st.pos++; save();
+  const card = $("card");
+  $(known ? "stOk" : "stBad").style.opacity = 1;
+  card.style.transition = "transform .28s ease-in, opacity .28s";
+  card.style.transform = (flipped ? "rotateY(180deg) " : "") + `translateX(${known ? 120 : -120}%) rotate(${known ? 14 : -14}deg)`;
+  setTimeout(() => { card.style.transition = ""; renderCard(); }, 260);
+}
+function undo(){
+  if(busy || !st.hist.length) return;
+  const known = st.hist.pop();
+  (known ? st.ok : st.bad).pop();
+  st.pos--; save(); renderCard();
+}
+
+$("card").addEventListener("click", e => { if(e.target.closest(".say") || dragMoved) return; flip(); });
+$("sayF").onclick = () => { const c = cur(), it = item(c.k); speak(c.d === "en" ? it.en : it.tr, c.d); };
+$("sayB").onclick = () => { const c = cur(), it = item(c.k); speak(c.d === "en" ? it.tr : it.en, c.d === "en" ? "tr" : "en"); };
+$("yes").onclick = () => answer(true);
+$("no").onclick = () => answer(false);
+$("undo").onclick = undo;
+$("home").onclick = renderStart;
+$("reshuffle").onclick = () => {
+  if(confirm("Bu listedeki tüm kartlar baştan karıştırılsın mı?")){ st = makeRound(st.pool, 1); save(); renderCard(); }
+};
+
+/* swipe */
+let sx = 0, sy = 0, dx = 0, dragging = false, dragMoved = false;
+const card = $("card");
+card.addEventListener("pointerdown", e => {
+  if(busy || e.target.closest(".say")) return;
+  dragging = true; dragMoved = false; sx = e.clientX; sy = e.clientY; dx = 0;
+});
+window.addEventListener("pointermove", e => {
+  if(!dragging) return;
+  dx = e.clientX - sx;
+  if(!dragMoved && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(e.clientY - sy)) dragMoved = true;
+  if(!dragMoved) return;
+  card.classList.add("drag");
+  card.style.transform = (flipped ? "rotateY(180deg) " : "") + `translateX(${dx}px) rotate(${dx / 20}deg)`;
+  $("stOk").style.opacity = Math.max(0, Math.min(1, dx / 100));
+  $("stBad").style.opacity = Math.max(0, Math.min(1, -dx / 100));
+});
+window.addEventListener("pointerup", () => {
+  if(!dragging) return;
+  dragging = false;
+  card.classList.remove("drag");
+  if(dragMoved && Math.abs(dx) > 90){ answer(dx > 0); }
+  else if(dragMoved){
+    card.style.transform = flipped ? "rotateY(180deg)" : "";
+    $("stOk").style.opacity = 0; $("stBad").style.opacity = 0;
+  }
+  setTimeout(() => { dragMoved = false; }, 0);
+});
+
+document.addEventListener("keydown", e => {
+  if($("vSession").classList.contains("hidden")) return;
+  if(e.key === " " || e.key === "Enter" || e.key === "ArrowUp" || e.key === "ArrowDown"){ e.preventDefault(); flip(); }
+  else if(e.key === "ArrowRight") answer(true);
+  else if(e.key === "ArrowLeft") answer(false);
+  else if(e.key === "Backspace" || (e.key === "z" && (e.ctrlKey || e.metaKey))){ e.preventDefault(); undo(); }
+});
+
+/* ---------- summary ---------- */
+function pairRow(it){
+  const d = document.createElement("div");
+  const a = document.createElement("span"), b = document.createElement("span");
+  a.textContent = it.en; b.textContent = it.tr;
+  if(it.ex) d.className = "ex";
+  d.append(a, b); return d;
+}
+function renderSum(){
+  const nOk = st.ok.length, nBad = st.bad.length;
+  $("sOk").textContent = nOk; $("sBad").textContent = nBad;
+  const done = nBad === 0;
+  $("sEmoji").textContent = done ? "🏆" : "💪";
+  $("sTtl").textContent = done ? (st.round === 1 ? "Hepsini bildin!" : "Hepsi tamam!") : st.round + ". tur bitti";
+  $("sTxt").textContent = done
+    ? `${st.round} turda ${st.pool.length} kartın hepsini tamamladın.`
+    : `${nBad} kart bir sonraki turda karışık sırayla tekrar gelecek.`;
+  $("sMiss").innerHTML = "";
+  $("sMiss").classList.toggle("hidden", done);
+  for(const k of st.bad) $("sMiss").append(pairRow(item(k)));
+  $("again").classList.toggle("hidden", done);
+  $("restart").textContent = `${st.pool.length} kartı baştan karıştır`;
+  show("vSum");
+}
+$("again").onclick = () => { st = makeRound(st.bad, st.round + 1, st.pool); save(); renderCard(); };
+$("restart").onclick = () => { st = makeRound(st.pool, 1); save(); renderCard(); };
+$("sHome").onclick = renderStart;
+
+/* ---------- list ---------- */
+$("toList").onclick = () => {
+  const l = $("list"); l.innerHTML = "";
+  for(const d of DECKS){
+    const h = document.createElement("h3");
+    h.textContent = d.name + " · " + d.title;
+    l.append(h);
+    for(const k of deckKeys(d, true)) l.append(pairRow(item(k)));
+  }
+  show("vList");
+};
+$("listBack").onclick = renderStart;
+
+/* ---------- init ---------- */
+(() => {
+  const s = load();
+  if(["en","tr","mix"].includes(s.dir)) dir = s.dir;
+  if(Array.isArray(s.sel)) sel = s.sel.filter(id => BY_ID[id]);
+  if(typeof s.withExpr === "boolean") withExpr = s.withExpr;
+  const ok = x => Array.isArray(x) && x.every(k => item(k.k || k));
+  if(s.st && ok(s.st.queue) && ok(s.st.pool) && ok(s.st.ok) && ok(s.st.bad)) st = s.st;
+  if(st && st.pos >= st.queue.length) renderSum(); else renderStart();
+})();
+</script>
+</body>
+</html>
