@@ -279,6 +279,22 @@ const WORDS71 = [
 ];
 const DECKS = [
  {id:"k71", name:"71 Kelime", title:"Karışık liste", words:WORDS71, expr:[]},
+ {id:"e7", name:"7 Ekim Kelimeler", title:"Unit 2 · defter listesi", words:[
+  ["medal", "madalya"],["injury", "sakatlık"],["draw", "beraberlik"],["equipment", "araç, gereç, malzeme"],
+  ["beat", "yenmek"],["lose", "kaybetmek"],["spectator", "seyirci"],["train", "antrenman yapmak"],
+  ["golden", "altın (renkli)"],["archery", "okçuluk"],["helmet", "kask"],["protect", "korumak"],
+  ["against", "…-a karşı"],["crowded", "kalabalık"],["end", "bitmek"],["diving", "dalış"],
+  ["skating", "paten kayma"],["cycling", "bisiklet sürme"],["wrestling", "güreş"],["paragliding", "yamaç paraşütü"],
+  ["be interested in", "ilgilenmek"],["how often", "ne sıklıkla"],["always", "her zaman"],["usually", "genellikle"],
+  ["often", "sık sık"],["sometimes", "bazen"],["rarely", "nadiren"],["never", "asla, hiç"],
+  ["need", "ihtiyaç duymak / ihtiyaç"],["necessary", "gerekli"],["jogging", "tempolu koşu"],["once", "bir kez"],
+  ["twice", "iki kez"],["weightlifting", "ağırlık kaldırma"],["kickboxing", "kick boks"],["fencing", "eskrim"],
+  ["careful", "dikkatli"],["aim", "amaç"],["amputee", "uzvu kesilmiş kişi (ampute)"],["individual", "bireysel"],
+  ["indoor", "iç mekân"],["outdoor", "dış mekân"],["follow", "takip etmek"],["coach", "antrenör"],
+  ["bow", "yay"],["arrow", "ok"],["target", "hedef"],["be into", "…-den hoşlanmak, ilgilenmek"],
+  ["pitch", "saha (futbol sahası)"],["last", "sürmek (zaman olarak)"],["point", "puan"],["crutch", "koltuk değneği"],
+  ["field", "saha, alan"],["opponent", "rakip"]
+ ], expr:[]},
  {id:"u1", name:"Unit 1", title:"Appearance & Personality", words:[
   ["attractive","çekici, alımlı"],["appearance","görünüş"],["blond(e)","sarışın"],["care","umursamak"],
   ["change ideas","fikir değiştirmek"],["curly","kıvırcık (saç)"],["cute","sevimli"],
@@ -486,7 +502,7 @@ function deckRow(cls, name, title, n, on, id){
 }
 function renderStart(){
   const box = $("decks"); box.innerHTML = "";
-  const units = DECKS.filter(d => d.id !== "k71");
+  const units = DECKS.filter(d => d.id.startsWith("u"));
   const allOn = units.length && units.every(d => sel.includes(d.id));
   for(const d of DECKS){
     box.append(deckRow("", d.name, d.title, deckKeys(d, withExpr).length, sel.includes(d.id), d.id));
@@ -505,7 +521,7 @@ $("decks").onclick = e => {
   const b = e.target.closest(".deck"); if(!b) return;
   const id = b.dataset.id;
   if(id === "*"){
-    const units = DECKS.filter(d => d.id !== "k71").map(d => d.id);
+    const units = DECKS.filter(d => d.id.startsWith("u")).map(d => d.id);
     const allOn = units.every(u => sel.includes(u));
     sel = allOn ? sel.filter(s => !units.includes(s)) : [...new Set(sel.concat(units))];
   } else sel = sel.includes(id) ? sel.filter(s => s !== id) : sel.concat(id);

@@ -5,6 +5,7 @@ Site: https://aukreg.github.io/gulayv2/
 
 ## Listeler
 - **71 Kelime**: Excel'deki karışık liste
+- **7 Ekim Kelimeler**: Unit 2 defter listesi (54 kelime)
 - **Unit 1–10**: ders kitabındaki "Important Words" (her ünitede 30 kelime) ve isteğe bağlı "Expressions"
 - Birden fazla liste seçilebilir; "Tüm üniteler" 10 üniteyi birlikte karıştırır.
 
